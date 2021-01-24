@@ -106,5 +106,19 @@ class FBDialect_fdb(FBDialect_kinterbasdb):
 
         return self._parse_version_info(version)
 
+    def is_disconnect(self, e, connection, cursor):
+        if isinstance(
+            e, (self.dbapi.OperationalError, self.dbapi.ProgrammingError, self.dbapi.DatabaseError)
+        ):
+            msg = str(e)
+            return (
+                "Error writing data to the connection" in msg
+                or "Unable to complete network request to host" in msg
+                or "Invalid connection state" in msg
+                or "Invalid cursor state" in msg
+                or "connection shutdown" in msg
+            )
+        else:
+            return False
 
 dialect = FBDialect_fdb
